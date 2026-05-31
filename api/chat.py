@@ -23,7 +23,7 @@ SYSTEM_PROMPT = """You are a helpful, friendly, and knowledgeable AI assistant.
 You provide clear, concise, and accurate answers.
 When you don't know something, you say so honestly."""
 
-HTML = open(os.path.join(os.path.dirname(__file__), "..", "public", "index.html"), encoding="utf-8").read()
+HTML = open(os.path.join(os.path.dirname(__file__), "index.html"), encoding="utf-8").read()
 
 @app.get("/", response_class=HTMLResponse)
 async def root():
