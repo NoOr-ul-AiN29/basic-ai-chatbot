@@ -1,6 +1,5 @@
 from fastapi import FastAPI, Request
-from fastapi.responses import JSONResponse, FileResponse
-from fastapi.staticfiles import StaticFiles
+from fastapi.responses import JSONResponse, HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 import os
 from groq import Groq
@@ -24,21 +23,17 @@ SYSTEM_PROMPT = """You are a helpful, friendly, and knowledgeable AI assistant.
 You provide clear, concise, and accurate answers.
 When you don't know something, you say so honestly."""
 
-# Serve static files (index.html) from the public folder
-app.mount("/public", StaticFiles(directory="public"), name="public")
-
-@app.get("/")
+@app.get("/", response_class=HTMLResponse)
 async def root():
-    return FileResponse("public/index.html")
+    with open("public/index.html", "r", encoding="utf-8") as f:
+        return HTMLResponse(content=f.read())
 
 @app.post("/api/chat")
 async def chat(request: Request):
     try:
         body = await request.json()
         conversation_history = body.get("messages", [])
-
         messages = [{"role": "system", "content": SYSTEM_PROMPT}] + conversation_history
-
         response = client.chat.completions.create(
             model="llama-3.3-70b-versatile",
             messages=messages,
@@ -46,6 +41,5 @@ async def chat(request: Request):
             max_tokens=1024,
         )
         return JSONResponse({"reply": response.choices[0].message.content})
-
     except Exception as e:
         return JSONResponse({"reply": handle_error(e)}, status_code=200)
